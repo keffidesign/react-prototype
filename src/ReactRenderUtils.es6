@@ -144,7 +144,9 @@ function resolveData(path, scope) {
         .split('.')
         .reduce((s, p) => {
 
-            const value = this[`get${capitalize(p)}`] || s[`get${capitalize(p)}`] || this[p] || s[p];
+            console.log('path', s, p, path)
+
+            const value = s[`get${capitalize(p)}`]  || s[p] || this[`get${capitalize(p)}`] || this[p];
 
             return (typeof value === 'function') ? value.call(this) : value;
 
