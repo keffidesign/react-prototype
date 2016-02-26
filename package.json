@@ -1,0 +1,16 @@
+{
+  "name": "react-prototype",
+  "version": "0.0.1",
+  "description": "The layer between Reangulact and React",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "applugins": "git://github.com/alitskevich/applugins.git",
+    "react": "^0.14.7",
+    "reangulact": "git://github.com/keffidesign/angular3.git"
+  }
+}
