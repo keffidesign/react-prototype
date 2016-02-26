@@ -4,19 +4,6 @@ export {Table, List, Button, Input, Dropdown, Checkbox, NavBar, Article, Footer,
 import {BaseComponent as _BaseComponent} from 'reangulact';
 import ReactPrototype from './src/ReactPrototype';
 
-
-Object.assign(_BaseComponent.prototype, ReactComponent.prototype, ReactPrototype);
-
-_BaseComponent.prototype.constructor = ReactComponent;
-
-_BaseComponent.prototype.internalConstructor = function() {
-
-    this._renderInternal = this.render;
-
-    this.render = ReactPrototype.render;
-
-    this.state = this.state || {};
-
-};
+Object.assign(_BaseComponent.prototype, ReactComponent.prototype, ReactPrototype, {constructor: ReactComponent});
 
 export const BaseComponent = _BaseComponent;

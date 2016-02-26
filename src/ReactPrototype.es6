@@ -22,7 +22,19 @@ export default {
     //
     //}
 
-    render: function() {
+    internalConstructor: function() {
+
+        this._renderInternal = this.render;
+
+        this.render = this.newRender;
+
+        this.state = this.state || {};
+
+    },
+
+    newRender: function() {
+
+        //console.log('render', this);
 
         const p = this.props;
         const st = this.state;
@@ -36,10 +48,6 @@ export default {
 
         }
 
-        //console.log('renderInternal', this._renderInternal);
-
-        //return this.prepareJsx(this._renderInternal, this.state);
-
         return this.prepareJsx(this._renderInternal.call(this), this.state);
 
     },
@@ -51,8 +59,6 @@ export default {
     },
 
     prepareJsx: function({type, props, children}, state) {
-
-        //console.log('prepareJsx', type, props, children);
 
         if (props.each) {
 
@@ -76,8 +82,6 @@ export default {
 
         if (props.if != undefined && state) {
 
-            //console.log('type', props.if);
-
             if (!props.if) {
 
                 const ElseStatment = children.filter(({type}) => type === 'else').pop();
@@ -91,10 +95,6 @@ export default {
             children = children.filter(({type}) => type !== 'else');
 
         }
-
-
-
-        //props = Object.keys(props).reduce((r,k) => (r[k] = this.resolveProp(k, props[k], state), r), {});
 
         return React.createElement(type, props, this.resolveChildren(children, state));
 
@@ -178,7 +178,9 @@ export default {
 
                 const value = this[`get${capitalize(p)}`] || s[`get${capitalize(p)}`] || this[p] || s[p];
 
-                return (typeof value === 'function') ? value.call(s) : value;
+                //console.log('resolveData', p, value, Object.keys(this));
+
+                return (typeof value === 'function') ? value.call(this) : value;
 
             }, scope || this.state);
 
@@ -297,21 +299,20 @@ export default {
     ,
     setData(data, extraState) {
 
-        console.log('setData', data, this);
-
-        if (!this.done) {
+        //if (!this.done()) {
 
             this.setState({data, ...extraState, dataChanged: (this.state.dataChanged || 0) + 1});
 
             this.dataChanged(data);
 
-        }
+        //}
 
     }
     ,
     dataChanged(data) {
 
         this.callPropsHook('onDataChanged', data);
+
     }
     ,
     reloadData(key = this.props.dataFrom, payload = this.props.dataFromPayload || {}) {
