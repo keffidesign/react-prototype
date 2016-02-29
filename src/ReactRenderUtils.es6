@@ -41,19 +41,22 @@ function prepareJsx({type, props, children}, state) {
 
     }
 
-    props = Object.keys(props).reduce((r,k) => {
+    props = Object.keys(props).reduce((r, k) => {
 
         let key = k;
 
         if (k === 'class') key = 'className';
 
-        r[key] = this::resolveProp(k, props[k], state);
+        r[key] = this::resolveProp(k, props[k]);
 
         return r;
 
     }, {});
 
+
     if (props.if != undefined && state) {
+
+        if (typeof props.if === 'function') props.if = this::props.if();
 
         if (!props.if) {
 
@@ -81,31 +84,23 @@ function cloneElement(type, props, children, state) {
 
 }
 
+function resolveChildren(children, state) {
+
+    if (children) return children.map(c => (typeof c === 'string') ? this::resolvePlaceholders(c) : this::prepareJsx(c, state));
+
+}
+
 function resolveProps(props) {
 
     return Object.keys(props).reduce((r, p) => p !== 'each' ? (r[p] = this::resolvePlaceholders(props[p]), r) : r, {});
 
 }
 
-function resolveChildren(children, state) {
-
-    if (!children) return null;
-
-    return children.map(c => (typeof c === 'string') ? this::resolvePlaceholders(c) : this::prepareJsx(c, state));
-
-}
-
-function resolveProp(key, value, scope) {
+function resolveProp(key, value) {
 
     if (typeof value !== 'string') return value;
 
     value = value.trim();
-
-    if (/^on[A-Z]/.test(key) || /Changed$/.test(key)) {
-
-        return this[value] ? (...args) => this[value](...args) : () => this.event(this::resolvePlaceholders(value)).emit();
-
-    }
 
     const selector = /(\w|[\[\]\(\)\,\.])+/g;
 
@@ -113,7 +108,7 @@ function resolveProp(key, value, scope) {
 
     if (calls && calls.length === 1 && calls[0].length === value.length) {
 
-        const result = this::resolveData(value, scope);
+        const result = this::resolveData(value);
 
         return result != undefined ? result : value;
 
@@ -134,23 +129,23 @@ function resolvePlaceholders(str) {
 
     return str
         .trim()
-        .replace(selector, p => this::resolveData(p.substring(2, p.length - 1)));
+        .replace(selector, p => this::resolveData(p.slice(2, -1)));
 
 }
 
-function resolveData(path, scope) {
+function resolveData(path) {
 
     return path
         .split('.')
         .reduce((s, p) => {
 
-            console.log('path', s, p, path)
-
             const value = s[`get${capitalize(p)}`]  || s[p] || this[`get${capitalize(p)}`] || this[p];
 
-            return (typeof value === 'function') ? value.call(this) : value;
+            if (typeof value === 'function') return value.name.startsWith('get') ? value.call(this) : value.bind(this);
 
-        }, scope || this.state);
+            return value;
+
+        }, this.state);
 
 }
 
@@ -168,18 +163,4 @@ function resolveEach(value) {
 
     return [scopeId, dataId];
 
-}
-
-function resolveIfDirective({props, children}) {
-
-    if (!this::resolveData(props.if)) {
-
-        const elseStatement = children.filter(({type}) => type === 'else').pop();
-
-        return elseStatement ? this::prepareJsx(elseStatement, state) : null;
-
-    }
-
-    children = children.filter(({type}) => type !== 'else');
-
-}
+}//166:3362
