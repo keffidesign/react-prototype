@@ -47,7 +47,7 @@ function prepareJsx({type, props, children}, state) {
 
         if (k === 'class') key = 'className';
 
-        r[key] = this::resolveProp(k, props[k]);
+        r[key] = this::resolveProp(props[k]);
 
         return r;
 
@@ -86,51 +86,20 @@ function cloneElement(type, props, children, state) {
 
 function resolveChildren(children, state) {
 
-    if (children) return children.map(c => (typeof c === 'string') ? this::resolvePlaceholders(c) : this::prepareJsx(c, state));
+    if (children) return children.map(c => (typeof c === 'string') ? this::resolveProp(c) : this::prepareJsx(c, state));
 
 }
 
 function resolveProps(props) {
 
-    return Object.keys(props).reduce((r, p) => p !== 'each' ? (r[p] = this::resolvePlaceholders(props[p]), r) : r, {});
-
+    return Object.keys(props).filter(key=>(key!=='each')).reduce((r, p) => ((r[p] = props[p]), r), {});
 }
 
-function resolveProp(key, value) {
+function resolveProp(str) {
 
-    if (typeof value !== 'string') return value;
+    if (!str || str[0] !== ':') return str;
 
-    value = value.trim();
-
-    const selector = /(\w|[\[\]\(\)\,\.])+/g;
-
-    const calls = value.match(selector);
-
-    if (calls && calls.length === 1 && calls[0].length === value.length) {
-
-        const result = this::resolveData(value);
-
-        return result != undefined ? result : value;
-
-    }
-
-    return value;
-
-}
-
-function resolvePlaceholders(str) {
-
-    if (!str || typeof str !== 'string') return str;
-
-    /**
-     * Select with #[<...>] placeholder
-     */
-    const selector = /#\[(\w|[\[\]\(\)\,\s\.])+\]/g;
-
-    return str
-        .trim()
-        .replace(selector, p => this::resolveData(p.slice(2, -1)));
-
+    return this::resolveData(str.slice(1));
 }
 
 function resolveData(path) {
