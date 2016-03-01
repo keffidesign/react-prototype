@@ -1,4 +1,4 @@
-import {createElement, render} from './ReactRenderUtils.es6';
+import {prepareJsx} from './ReactRenderUtils.es6';
 import {Component} from 'react';
 
 export default {
@@ -9,30 +9,28 @@ export default {
 
         this.state = {...props};
 
-        this.__render = this.render;
+        const __render = this.render;
 
-        this.render = render;
-
+        this.render = () => this::prepareJsx(this::__render());
     },
 
-    createElement,
+    createElement(type, props, ...children){
+
+        return {type, props: props || {}, children}
+    },
 
     update(state) {
 
         this.setState(state);
-
     },
 
     componentWillUnmount() {
 
         this.done();
-
     },
 
     componentWillMount() {
 
         this.init();
-
     }
-
-}
+};
