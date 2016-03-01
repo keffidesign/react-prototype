@@ -2,11 +2,11 @@ const capitalize = (s) => (s.charAt(0).toUpperCase() + s.slice(1));
 
 export function prepareJsx({type, props, children}) {
 
-    if (props.each) {
+    if ('each' in props) {
 
         const [scopeId, op, dataId] = props.each.split(' ');
 
-        const data = this::resolveData(dataId);
+        const data = this::resolveProp(dataId);
 
         if (!data) return null;
 
@@ -31,19 +31,19 @@ export function prepareJsx({type, props, children}) {
 
     }, {});
 
-    if (props.if != undefined) {
+    if ('if' in props) {
 
         if (typeof props.if === 'function') props.if = this::props.if();
 
         if (!props.if) {
 
-            const elseStatment = children.filter(({type}) => type === 'else').pop();
+            const elseStatment = children && children.filter(({type}) => type === 'else').pop();
 
             return elseStatment ? this::prepareJsx(elseStatment) : null;
 
         }
 
-        children = children.filter(({type}) => type !== 'else');
+        children = children && children.filter(({type}) => type !== 'else');
 
     }
 
@@ -56,12 +56,11 @@ function resolveChildren(children) {
     if (children) return children.map(c => (typeof c === 'string') ? this::resolveProp(c) : this::prepareJsx(c));
 }
 
-function resolveProp(str) {
+function resolveProp(p) {
 
-    return (str && str[0] === ':') ? this::resolveData(str.slice(1)) : str;
-}
+    if (!p || p[0] !== ':') return p;
 
-function resolveData(p) {
+    p = p.slice(1);
 
     const fnKey = `get${capitalize(p)}`;
 
@@ -71,9 +70,9 @@ function resolveData(p) {
 
     if (typeof value === 'function') {
 
-        if (!this[`__${p}`]) {
-            value = this[`__${p}`] = value.bind(this);
-        }
+        const cacheKey = `__${p}`;
+
+        value = this[cacheKey] || (this[cacheKey] = value.bind(this));
 
         if (factory) {
             value = value();

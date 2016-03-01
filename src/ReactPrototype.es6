@@ -16,7 +16,7 @@ export default {
 
     createElement(type, props, ...children){
 
-        return {type, props: props || {}, children}
+        return {type, props: props || {}, children: children.length ? children : null}
     },
 
     update(state) {
