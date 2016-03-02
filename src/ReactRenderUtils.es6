@@ -26,7 +26,7 @@ export function prepareJsx({type, props, children}) {
 
             this.$[scopeId] = d;
 
-            return this::prepareJsx({type, newProps, children});
+            return this::prepareJsx({type, props: newProps, children});
 
         });
     }
