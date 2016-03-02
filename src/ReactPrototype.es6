@@ -15,12 +15,8 @@ export default {
     },
 
     initialState(props){
+
         return {...props}
-    },
-
-    createElement(type, props, ...children){
-
-        return {type, props: props || {}, children: children.length ? children : null}
     },
 
     update(state, cb) {

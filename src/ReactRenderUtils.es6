@@ -5,12 +5,9 @@ const propsNames = {
     'click':'onClick'
 };
 
-export function jsx(type, props, ...children){
+let COUNTER = 0;
 
-    return {type, props: props || {}, children: children.length ? children : null}
-}
-
-export function prepareJsx({type, props, children}) {
+export function prepareJsx([type, props, ...children]) {
 
     if ('each' in props) {
 
@@ -26,7 +23,9 @@ export function prepareJsx({type, props, children}) {
 
             this.$[scopeId] = d;
 
-            return this::prepareJsx({type, props: newProps, children});
+            newProps.key = d.key || d.id || (++COUNTER);
+
+            return this::prepareJsx([type, newProps, ...children]);
 
         });
     }
@@ -52,16 +51,9 @@ export function prepareJsx({type, props, children}) {
 
     }, {});
 
-    children = children && children.map(c => (typeof c === 'string') ? this::resolveProp(c) : this::prepareJsx(c));
+    children = children && children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : this::prepareJsx(c));
 
     return React.createElement(type, props, children);
-}
-
-function resolvePipes(v, pipes) {
-    for (let p of pipes){
-        v = this.pipes[p](v);
-    }
-    return v;
 }
 
 function resolveProp(_p) {
@@ -88,4 +80,11 @@ function resolveProp(_p) {
     }
 
     return pipes.length ? this::resolvePipes(value, pipes) : value;
+}
+
+function resolvePipes(v, pipes) {
+    for (let p of pipes){
+        v = this.pipes[p](v);
+    }
+    return v;
 }
