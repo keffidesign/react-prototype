@@ -7,11 +7,15 @@ export default {
 
         this::Component(props, context);
 
-        this.state = {...props};
+        this.state = this.initialState(props);
 
-        const __render = this.render;
+        const jsx = this.render();
 
-        this.render = () => this::prepareJsx(this::__render());
+        this.render = () => this::prepareJsx(jsx);
+    },
+
+    initialState(props){
+        return {...props}
     },
 
     createElement(type, props, ...children){
@@ -19,9 +23,9 @@ export default {
         return {type, props: props || {}, children: children.length ? children : null}
     },
 
-    update(state) {
+    update(state, cb) {
 
-        this.setState(state);
+        this.setState(state, cb);
     },
 
     componentWillUnmount() {

@@ -1,5 +1,15 @@
 const capitalize = (s) => (s.charAt(0).toUpperCase() + s.slice(1));
 
+const propsNames = {
+    'class':'className',
+    'click':'onClick'
+};
+
+export function jsx(type, props, ...children){
+
+    return {type, props: props || {}, children: children.length ? children : null}
+}
+
 export function prepareJsx({type, props, children}) {
 
     if ('each' in props) {
@@ -14,53 +24,51 @@ export function prepareJsx({type, props, children}) {
 
         return data.map(d => {
 
-            this[scopeId] = d;
+            this.$[scopeId] = d;
 
             return this::prepareJsx({type, newProps, children});
 
         });
     }
 
-    props = Object.keys(props).reduce((r, k) => {
-
-        const key = (k === 'class') ? 'className' : k;
-
-        r[key] = this::resolveProp(props[k]);
-
-        return r;
-
-    }, {});
-
     if ('if' in props) {
 
-        if (typeof props.if === 'function') props.if = this::props.if();
+        if (!this::resolveProp(props.if)) {
 
-        if (!props.if) {
+            const elze = children && children.filter(({type}) => type === 'else').pop();
 
-            const elseStatment = children && children.filter(({type}) => type === 'else').pop();
-
-            return elseStatment ? this::prepareJsx(elseStatment) : null;
-
+            return elze ? this::prepareJsx(elze) : null;
         }
 
         children = children && children.filter(({type}) => type !== 'else');
 
     }
 
-    return React.createElement(type, props, this::resolveChildren(children));
+    props = Object.keys(props).reduce((r, k) => {
 
+        r[propsNames[k]||k] = this::resolveProp(props[k]);
+
+        return r;
+
+    }, {});
+
+    children = children && children.map(c => (typeof c === 'string') ? this::resolveProp(c) : this::prepareJsx(c));
+
+    return React.createElement(type, props, children);
 }
 
-function resolveChildren(children) {
-
-    if (children) return children.map(c => (typeof c === 'string') ? this::resolveProp(c) : this::prepareJsx(c));
+function resolvePipes(v, pipes) {
+    for (let p of pipes){
+        v = this.pipes[p](v);
+    }
+    return v;
 }
 
-function resolveProp(p) {
+function resolveProp(_p) {
 
-    if (!p || p[0] !== ':') return p;
+    if (!_p || _p[0] !== ':') return _p;
 
-    p = p.slice(1);
+    const [p, ...pipes] = _p.slice(1).split('|');
 
     const fnKey = `get${capitalize(p)}`;
 
@@ -72,12 +80,12 @@ function resolveProp(p) {
 
         const cacheKey = `__${p}`;
 
-        value = this[cacheKey] || (this[cacheKey] = value.bind(this));
+        value = this.$[cacheKey] || (this.$[cacheKey] = value.bind(this));
 
         if (factory) {
             value = value();
         }
     }
 
-    return value;
+    return pipes.length ? this::resolvePipes(value, pipes) : value;
 }
