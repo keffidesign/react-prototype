@@ -1,59 +1,67 @@
 const capitalize = (s) => (s.charAt(0).toUpperCase() + s.slice(1));
 
 const propsNames = {
-    'class':'className',
-    'click':'onClick'
+    'class': 'className',
+    'click': 'onClick'
 };
 
 let COUNTER = 0;
 
 export function prepareJsx([type, props, ...children]) {
 
-    if ('each' in props) {
+    if (props) {
 
-        const [scopeId, op, dataId] = props.each.split(' ');
+        if ('each' in props) {
 
-        const data = this::resolveProp(dataId);
+            const [scopeId, op, dataId] = props.each.split(' ');
 
-        if (!data) return null;
+            const data = this::resolveProp(dataId);
 
-        const newProps = Object.keys(props).filter(key=>(key !== 'each')).reduce((r, p) => ((r[p] = props[p]), r), {});
+            if (!data) return null;
 
-        return data.map(d => {
+            const newProps = Object.keys(props).filter(key=>(key !== 'each')).reduce((r, p) => ((r[p] = props[p]), r), {});
 
-            this.$[scopeId] = d;
+            return data.map(d => {
 
-            newProps.key = d.key || d.id || (++COUNTER);
+                this.$[scopeId] = d;
 
-            return this::prepareJsx([type, newProps, ...children]);
+                newProps.key = d.key || d.id || (++COUNTER);
 
-        });
-    }
+                return this::prepareJsx([type, newProps, ...children]);
 
-    if ('if' in props) {
-
-        if (!this::resolveProp(props.if)) {
-
-            const elze = children && children.filter(({type}) => type === 'else').pop();
-
-            return elze ? this::prepareJsx(elze) : null;
+            });
         }
 
-        children = children && children.filter(({type}) => type !== 'else');
+        if ('if' in props) {
 
+            let val = this::resolveProp(props.if);
+
+            if (props.ifMatch) {
+                val = val == this::resolveProp(props.ifMatch)
+            }
+
+            if (!val) {
+
+                const elze = children && children.filter(({type}) => type === 'else').pop();
+
+                return elze ? this::prepareJsx(elze) : null;
+            }
+
+            children = children && children.filter(({type}) => type !== 'else');
+        }
+
+        props = Object.keys(props).reduce((r, k) => {
+
+            r[propsNames[k] || k] = this::resolveProp(props[k]);
+
+            return r;
+
+        }, {});
     }
-
-    props = Object.keys(props).reduce((r, k) => {
-
-        r[propsNames[k]||k] = this::resolveProp(props[k]);
-
-        return r;
-
-    }, {});
 
     children = children && children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : this::prepareJsx(c));
 
-    return React.createElement(type, props, children);
+    return type === 'for' || type === 'else' || type === 'block' ? children : React.createElement(type, props, children);
 }
 
 function resolveProp(_p) {
@@ -83,7 +91,7 @@ function resolveProp(_p) {
 }
 
 function resolvePipes(v, pipes) {
-    for (let p of pipes){
+    for (let p of pipes) {
         v = this.pipes[p](v);
     }
     return v;

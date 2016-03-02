@@ -19,11 +19,6 @@ export default {
         return {...props}
     },
 
-    update(state, cb) {
-
-        this.setState(state, cb);
-    },
-
     componentWillUnmount() {
 
         this.done();
