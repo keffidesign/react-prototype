@@ -3,6 +3,8 @@ const capitalize = (s) => (s.charAt(0).toUpperCase() + s.slice(1));
 // "a-bc-de" => "aBcDe"
 const properify = (s) => (s.split('-').map((c,i)=>(i?capitalize(c):c)).join(''));
 
+const EMPTY_STR = {'':1, '0':1, 'false':1, 'null':1, 'undefined':1};
+
 const propsNames = {
     'class': 'className',
     'click': 'onClick',
@@ -13,6 +15,16 @@ const ADAPTERS = {
 
     style(v){
         return (typeof v ==='string')?v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[properify(kv[0])] = kv[1], p), {}):v;
+    }
+    ,
+
+    ['class'](v){
+        return (typeof v ==='string')?v.split(' ').reduce((p, q, i, arr, kv = q.split(':'))=>{
+                if (kv.length===1 || !(kv[1] in EMPTY_STR)){
+                    p.push(kv[0]);
+                }
+                return p
+        }, []).join(' '):v;
     }
 };
 
