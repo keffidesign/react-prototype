@@ -1,3 +1,5 @@
+import React from 'react';
+
 // "abc" => "Abc"
 const capitalize = (s) => (s.charAt(0).toUpperCase() + s.slice(1));
 // "a-bc-de" => "aBcDe"

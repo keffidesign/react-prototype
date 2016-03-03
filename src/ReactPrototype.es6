@@ -14,10 +14,6 @@ export default {
         this.render = () => this::createElement(jsx);
     },
 
-    initialState(props){
-
-        return {...props}
-    },
 
     componentWillUnmount() {
 
