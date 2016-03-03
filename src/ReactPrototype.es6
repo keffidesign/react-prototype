@@ -1,4 +1,4 @@
-import {prepareJsx} from './ReactRenderUtils.es6';
+import {createElement} from './ReactRenderUtils.es6';
 import {Component} from 'react';
 
 export default {
@@ -11,7 +11,7 @@ export default {
 
         const jsx = this.render();
 
-        this.render = () => this::prepareJsx(jsx);
+        this.render = () => this::createElement(jsx);
     },
 
     initialState(props){

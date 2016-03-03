@@ -18,7 +18,7 @@ const ADAPTERS = {
 
 let COUNTER = 0;
 
-export function prepareJsx([type, props, ...children]) {
+export function createElement([type, props, ...children]) {
 
     if (props) {
 
@@ -38,7 +38,7 @@ export function prepareJsx([type, props, ...children]) {
 
                 const key = d.key || d.id || (++COUNTER);
 
-                return this::prepareJsx([type, {...newProps, key}, ...children]);
+                return this::createElement([type, {...newProps, key}, ...children]);
 
             });
         }
@@ -57,7 +57,7 @@ export function prepareJsx([type, props, ...children]) {
 
                 //console.log('else',type, props, children);
 
-                return elze ? this::prepareJsx(elze) : null;
+                return elze ? this::createElement(elze) : null;
             }
 
             children = children.filter(([type]) => type !== 'else');
@@ -76,7 +76,7 @@ export function prepareJsx([type, props, ...children]) {
         }, {});
     }
 
-    children = children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : this::prepareJsx(c));
+    children = children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : this::createElement(c));
 
     return type === 'for' || type === 'else' || type === 'block' ? children : React.createElement(type, props, children);
 }
@@ -112,9 +112,6 @@ function resolveProp(_p) {
             }
         }
     }
-
-
-
 
     return pipes.length ? this::resolvePipes(value, pipes) : value;
 }
