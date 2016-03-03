@@ -15,7 +15,7 @@ const ADAPTERS = {
     style(v){
         return (typeof v ==='string')?v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[properify(kv[0])] = kv[1], p), {}):v;
     }
->>>>>>> origin/master
+
 };
 
 let COUNTER = 0;
