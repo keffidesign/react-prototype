@@ -8,6 +8,7 @@ const EMPTY_STR = {'':1, '0':1, 'false':1, 'null':1, 'undefined':1};
 const propsNames = {
     'class': 'className',
     'click': 'onClick',
+    'change': 'onChange',
     'scroll': 'onScroll'
 };
 
