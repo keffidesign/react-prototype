@@ -93,7 +93,13 @@ export function createElement([type, props, ...children]) {
 
     children = children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : this::createElement(c));
 
-    return type === 'for' || type === 'else' || type === 'block' ? children : React.createElement(type, props, children);
+    console.log('createElement',type, props, children);
+
+    return type === 'for' || type === 'else' || type === 'block'
+        ?
+        children
+        :
+        React.createElement(type, props, children.length?children:null);
 }
 
 function resolveProp(_p) {
@@ -104,28 +110,18 @@ function resolveProp(_p) {
 
     let value;
 
-    if (p[0] === '(' && p.endsWith(')')) {
+    if (p.match(/^\w+(\.\w+)*$/)) {
 
-        value = p.slice(1, p.length-1).replace(/\((\:\w+(\.\w+)*)\)/g,(s,s1)=>this::resolveProp(s1));
+        value = this.get(p);
+
+    } else if (p[0] === '{' && p.endsWith('}')) {
+
+        value = p.replace(/\(?(\:\w+(\.\w+)*)\)?/g,(s,s1)=>this::resolveProp(s1));
 
     } else {
 
-        const fnKey = `get${capitalize(p)}`;
+        value = p.slice(1, p.length-1).replace(/\(?(\:\w+(\.\w+)*)\)?/g,(s,s1)=>this::resolveProp(s1));
 
-        const factory = this.get(fnKey) || this[fnKey];
-
-        value = factory || this.get(p) || this[p];
-
-        if (typeof value === 'function') {
-
-            const cacheKey = `__${p}`;
-
-            value = this.$[cacheKey] || (this.$[cacheKey] = value.bind(this));
-
-            if (factory) {
-                value = value();
-            }
-        }
     }
 
     return pipes.length ? this::resolvePipes(value, pipes) : value;
