@@ -11,7 +11,7 @@ export default {
 
         const jsx = this.render();
 
-        this.render = () => this::createElement(jsx);
+        this.render = () => createElement.apply(this, jsx);
     },
 
 
