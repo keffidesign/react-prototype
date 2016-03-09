@@ -7,14 +7,17 @@ export default {
 
         this::Component(props, context);
 
-        this.state = this.initialState(props);
+        this.state = { ...this.initialState(), ...props};
 
         const jsx = this.render();
 
         this.render = () => createElement.apply(this, jsx);
     },
 
+    setState(newState, cb) {
 
+        Component.prototype.setState.call(this, newState, cb);
+    },
     componentWillUnmount() {
 
         this.done();
