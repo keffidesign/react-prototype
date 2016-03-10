@@ -16,18 +16,18 @@ const propsNames = {
 
 const ADAPTERS = {
 
-    style(v){
-        return (typeof v ==='string')?v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[properify(kv[0])] = kv[1], p), {}):v;
+    style(v, r){
+        r.style =  (typeof v ==='string')?v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[properify(kv[0])] = kv[1], p), {}):v;
     }
     ,
+    ['class'](v, r){
 
-    ['class'](v){
-        return (typeof v ==='string')?v.split(' ').reduce((p, q, i, arr, kv = q.split(':'))=>{
-                if (kv.length===1 || !(kv[1] in EMPTY_STR)){
-                    p.push(kv[0]);
+        r['className'] = (typeof v ==='string')?v: Object.keys(v).reduce((p, key)=>{
+                if (v[key] && !(v[key] in EMPTY_STR)){
+                    p.push(key);
                 }
                 return p
-        }, []).join(' '):v;
+        }, []).join(' ');
     }
 };
 
@@ -82,13 +82,21 @@ export function createElement(type, props, ...children) {
             children = children.filter(([type]) => type !== 'else');
         }
 
+        const isComponent  = (typeof type !== 'string');
+
         props = Object.keys(props).reduce((r, k) => {
 
             let value = this::resolveProp(props[k]);
 
             let adapter = ADAPTERS[k];
 
-            r[propsNames[k] || k] = adapter ? adapter(value) : value;
+            const key = !isComponent && propsNames[k] || k;
+
+            if (adapter) {
+                adapter(value, r);
+            } else {
+                r[key] =  value;
+            }
 
             return r;
 
@@ -120,7 +128,13 @@ function resolveProp(_p) {
 
     } else if (p[0] === '{' && p.endsWith('}')) {
 
-        value = p.replace(/\(?(\:\w+(\.\w+)*)\)?/g,(s,s1)=>this::resolveProp(s1));
+        value = p.slice(1, p.length-1).replace(/\(?(\:\w+(\.\w+)*)\)?/g,(s,s1)=>this::resolveProp(s1));
+
+        value = value.split(',').reduce((p, q)=> {
+            const kv = q.split(':');
+            p[kv[0].trim()] = kv[1].trim();
+            return p;
+        }, {})
 
     } else {
 

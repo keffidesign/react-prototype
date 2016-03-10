@@ -1,8 +1,33 @@
+import {Component} from 'reangulact';
+import {Component as ReactComponent} from 'react';
+import {createElement} from './Utils.es6';
 
-import {BaseComponent as _BaseComponent} from 'reangulact';
-import ReactPrototype from './src/ReactPrototype';
-import {Component} from 'react';
+/**
+ * Make Reangulact Component being based on React.
+ */
+export function initialize() {
 
-Object.assign(_BaseComponent.prototype, Component.prototype, ReactPrototype);
+    Object.assign(Component.prototype, ReactComponent.prototype, {
 
-export const BaseComponent = _BaseComponent ;
+        internalConstructor(props, context) {
+
+            this::ReactComponent(props, context);
+
+            this.state = { ...this.getDefaults(), ...props};
+
+            const jsx = this.render();
+
+            this.render = () => createElement.apply(this, jsx);
+        },
+
+        componentWillMount() {
+
+            this.init();
+        },
+
+        componentWillUnmount() {
+
+            this.done();
+        }
+    });
+}
