@@ -20,7 +20,7 @@ export function initialize() {
             this.render = () => createElement.apply(this, jsx);
         },
 
-        componentWillMount() {
+        componentDidMount() {
 
             this.init();
         },
