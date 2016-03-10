@@ -99,7 +99,7 @@ export function createElement(type, props, ...children) {
 
     children = children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : createElement.apply(this, c));
 
-    console.log('createElement',type, props, children);
+    //console.log('createElement',type, props, children);
 
     return type === 'for' || type === 'else' || type === 'block'
         ?
