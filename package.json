@@ -1,5 +1,5 @@
 {
-  "name": "react-prototype",
+  "name": "reangulact-r",
   "version": "0.0.1",
   "description": "The layer between Reangulact and React",
   "main": "index.js",
@@ -9,8 +9,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "applugins": "git://github.com/alitskevich/applugins.git",
     "react": "^0.14.7",
-    "reangulact": "git://github.com/keffidesign/angular3.git"
+    "reangulact": "git://github.com/keffidesign/reangulact.git"
   }
 }

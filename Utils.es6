@@ -1,11 +1,5 @@
 import React from 'react';
-
-// "abc" => "Abc"
-const capitalize = (s) => (s.charAt(0).toUpperCase() + s.slice(1));
-// "a-bc-de" => "aBcDe"
-const properify = (s) => (s.split('-').map((c,i)=>(i?capitalize(c):c)).join(''));
-
-const EMPTY_STR = {'':1, '0':1, 'false':1, 'null':1, 'undefined':1};
+import {capitalize,properify, EMPTY_STR} from 'reangulact/utils.es6';
 
 const propsNames = {
     'class': 'className',
