@@ -1,6 +1,6 @@
 import {Component} from 'reangulact';
 import {Component as ReactComponent} from 'react';
-import {createElement} from './Utils.es6';
+import {createElement} from './ReactUtils.es6';
 
 /**
  * Make Reangulact Component being based on React.

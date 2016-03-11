@@ -1,33 +1,34 @@
 import React from 'react';
 import {capitalize,properify, EMPTY_STR} from 'reangulact/utils.es6';
 
-const propsNames = {
-    'class': 'className',
-    'click': 'onClick',
-    'change': 'onChange',
-    'scroll': 'onScroll'
-};
-
 const ADAPTERS = {
 
-    style(v, r){
-        r.style =  (typeof v ==='string')?v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[properify(kv[0])] = kv[1], p), {}):v;
+    style(v, k, r){
+
+        if (typeof v ==='string'){
+
+            v = v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[properify(kv[0])] = kv[1], p), {})
+        }
+
+        r.style = v;
     }
     ,
-    ['class'](v, r){
-
-        r['className'] = (typeof v ==='string')?v: Object.keys(v).reduce((p, key)=>{
-                if (v[key] && !(v[key] in EMPTY_STR)){
-                    p.push(key);
-                }
-                return p
-        }, []).join(' ');
+    ['class'](v, k, r,  isComponent){
+        if (typeof v !=='string'){
+            v = Object.keys(v).filter((key)=>(v[key] && !(v[key] in EMPTY_STR))).join(' ');
+        }
+        r['className'] = v;
     }
+    ,
+    click(v, k, r, isComponent){ r[isComponent ? k :'onClick']= v;},
+    change(v, k, r, isComponent){ r[isComponent ? k :'onChange']= v;},
+    scroll(v, k, r, isComponent){ r[isComponent ? k :'onScroll']= v;}
 };
 
 let COUNTER = 0;
 
 export function createElement(type, props, ...children) {
+
     if (type === 'children'){
 
         return this.props.children;
@@ -47,7 +48,7 @@ export function createElement(type, props, ...children) {
 
             return data.map(d => {
 
-                this.$[scopeId] = d;
+                this.state[scopeId] = d;
 
                 const key = d.key || d.id || (++COUNTER);
 
@@ -84,12 +85,12 @@ export function createElement(type, props, ...children) {
 
             let adapter = ADAPTERS[k];
 
-            const key = !isComponent && propsNames[k] || k;
-
             if (adapter) {
-                adapter(value, r);
+
+                adapter.call(this, value, k, r, isComponent);
             } else {
-                r[key] =  value;
+
+                r[k] = value;
             }
 
             return r;
@@ -114,28 +115,35 @@ function resolveProp(_p) {
 
     let [p, ...pipes] = _p.slice(1).split('|');
 
-    let value;
+    let value=parseBindingExpression.call(this,p);
+
+    return pipes.length ? this::resolvePipes(value, pipes) : value;
+}
+
+function parseBindingExpression(p) {
 
     if (p.match(/^\w+(\.\w+)*$/)) {
 
-        value = this.get(p);
+        return this.get(p);
+    }
 
-    } else if (p[0] === '{' && p.endsWith('}')) {
+    if (p[0] === '{' && p.endsWith('}')) {
 
-        value = p.slice(1, p.length-1).replace(/\(?(\:\w+(\.\w+)*)\)?/g,(s,s1)=>this::resolveProp(s1));
+        let value = p.slice(1, p.length-1).replace(/\((\:\w+(\.\w+)*)\)/g,(s,s1)=>this::resolveProp(s1));
 
-        value = value.split(',').reduce((p, q)=> {
+        return value.split(',').reduce((p, q)=> {
             const kv = q.split(':');
             p[kv[0].trim()] = kv[1].trim();
             return p;
         }, {})
-
-    } else {
-
-        value = ((p[0] === '(' && p.endsWith(')')) ? p.slice(1, p.length-1) : p).replace(/\(?(\:\w+(\.\w+)*)\)?/g,(s,s1)=>this::resolveProp(s1));
     }
 
-    return pipes.length ? this::resolvePipes(value, pipes) : value;
+    if (p[0] === '(' && p.endsWith(')')) {
+
+        return p.slice(1, p.length-1).replace(/\((\:\w+(\.\w+)*)\)/g,(s,s1)=>this::resolveProp(s1));
+    }
+
+    return p;
 }
 
 function resolvePipes(v, pipes) {
