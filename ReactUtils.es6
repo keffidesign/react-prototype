@@ -115,9 +115,10 @@ function resolveProp(_p) {
 
     let [p, ...pipes] = _p.slice(1).split('|');
 
-    let value=parseBindingExpression.call(this,p);
+    let value = parseBindingExpression.call(this, p);
 
-    return pipes.length ? this::resolvePipes(value, pipes) : value;
+    return pipes.length ? this::this.transform(value, pipes.map(p => p.trim())) : value;
+
 }
 
 function parseBindingExpression(p) {
@@ -144,11 +145,4 @@ function parseBindingExpression(p) {
     }
 
     return p;
-}
-
-function resolvePipes(v, pipes) {
-    for (let p of pipes) {
-        v = this.pipes[p](v);
-    }
-    return v;
 }
