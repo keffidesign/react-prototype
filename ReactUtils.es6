@@ -1,6 +1,11 @@
 import React from 'react';
 import {capitalize,properify, EMPTY_STR} from 'reangulact/utils.es6';
 
+const OPS= {
+    'is': (a,b)=> (a===b),
+    'isnt': (a,b)=> (a!==b)
+}
+
 const ADAPTERS = {
 
     style(v, k, r){
@@ -62,10 +67,12 @@ export function createElement(type, props, ...children) {
 
         if ('if' in props) {
 
-            let val = this::resolveProp(props.if);
+            const [ifExpr, ifOp, ifMatch]= props.if.split(' ');
 
-            if (props.ifMatch!==undefined) {
-                val = val == this::resolveProp(props.ifMatch)
+            let val = this::resolveProp(ifExpr);
+
+            if (ifMatch!==undefined) {
+                val = OPS[ifOp](val, this::resolveProp(ifMatch))
             }
 
             if (!val) {
@@ -133,13 +140,12 @@ function parseBindingExpression(p) {
 
     if (p[0] === '{' && p.endsWith('}')) {
 
-        return Function('return '+p.replace(/\((\:\w+(\.\w+)*)\)/g,(s,s1)=>this::resolveProp(s1)))();
-
+        return Function('return '+p.replace(/\(:(\w+(\.\w+)*)\)/g,(s,s1)=>`this.get("${s1}")`)).call(this);
     }
 
     if (p[0] === '(' && p.endsWith(')')) {
 
-        return p.slice(1, p.length-1).replace(/\((\:\w+(\.\w+)*)\)/g,(s,s1)=>this::resolveProp(s1));
+        return p.slice(1, p.length-1).replace(/\(:(\w+(\.\w+)*)\)/g,(s,s1)=>this.get(s1));
     }
 
     return p;
