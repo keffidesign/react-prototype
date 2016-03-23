@@ -7,10 +7,13 @@ const ADAPTERS = {
 
         if (typeof v ==='string'){
 
-            v = v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[properify(kv[0])] = kv[1], p), {})
+            v = v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[(kv[0])] = kv[1], p), {})
         }
 
-        r.style = v;
+        r.style = Object.keys(v).reduce((p, k)=> {
+            p[properify(k)] = v[k];
+            return p;
+        }, {});
     }
     ,
     ['class'](v, k, r,  isComponent){
@@ -130,13 +133,8 @@ function parseBindingExpression(p) {
 
     if (p[0] === '{' && p.endsWith('}')) {
 
-        let value = p.slice(1, p.length-1).replace(/\((\:\w+(\.\w+)*)\)/g,(s,s1)=>this::resolveProp(s1));
+        return Function('return '+p.replace(/\((\:\w+(\.\w+)*)\)/g,(s,s1)=>this::resolveProp(s1)))();
 
-        return value.split(',').reduce((p, q)=> {
-            const kv = q.split(':');
-            p[kv[0].trim()] = kv[1].trim();
-            return p;
-        }, {})
     }
 
     if (p[0] === '(' && p.endsWith(')')) {
