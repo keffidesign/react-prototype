@@ -58,7 +58,7 @@ export function createElement(type, props, ...children) {
 
                 this.state[scopeId] = d;
 
-                const key = d.key || d.id || (++COUNTER);
+                const key = d && (d.key || d.id) || (++COUNTER);
 
                 return createElement.call(this, type, {...newProps, key}, ...children);
 

@@ -20,6 +20,13 @@ export function initialize() {
             this.render = () => createElement.apply(this, jsx);
         },
 
+        setState(newState, cb) {
+            //this.$ = {};
+            ReactComponent.prototype.setState.call(this, newState);
+
+            cb && cb();
+        },
+
         componentDidMount() {
 
             this.init();
