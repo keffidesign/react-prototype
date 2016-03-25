@@ -77,11 +77,21 @@ export function createElement(type, props, ...children) {
 
             if (!val) {
 
-                const elze = children.filter(([type]) => type === 'else').pop();
+                const elze = children.find(([type]) => type === 'else');
 
-                //console.log('else',type, props, children);
+                if (!elze || elze.length<3) return null;
 
-                return elze ? createElement.apply(this, elze) : null;
+                const map = elze.slice(2).reduce((r,d) => {
+                    const el = createElement.apply(this, d);
+                    if (el){
+                        r.push(el)
+                    }
+                    return r;
+                }, []);
+
+                console.log('else',elze, map);
+
+                return map.length===1 ? map[0] : map;
             }
 
             children = children.filter(([type]) => type !== 'else');
@@ -90,6 +100,8 @@ export function createElement(type, props, ...children) {
         const isComponent  = (typeof type !== 'string');
 
         props = Object.keys(props).reduce((r, k) => {
+
+            if (k==='if' || k==='each') return r;
 
             let value = this::resolveProp(props[k]);
 
@@ -110,13 +122,13 @@ export function createElement(type, props, ...children) {
 
     children = children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : createElement.apply(this, c));
 
-    //console.log('createElement',type, props, children);
+    console.log('createElement',type, props, children);
 
     return type === 'for' || type === 'else' || type === 'block'
         ?
-        children
+        (children.length===1?children[0]:children)
         :
-        React.createElement(type, props, children.length?children:null);
+        React.createElement(type, props, ...children);
 }
 
 function resolveProp(_p) {

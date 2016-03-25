@@ -1,0 +1,19 @@
+//Isn't used at the moment.
+//But seems that it should work
+{
+    "presets": [
+        'es2015', 'stage-0', 'react'
+    ]
+    ,
+    plugins: [
+        [
+            'transform-react-jsx'
+            ,
+            {
+                pragma: 'Array'
+            }
+        ]
+        ,
+        'transform-flow-strip-types'
+    ]
+}

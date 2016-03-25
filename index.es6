@@ -9,6 +9,8 @@ export function initialize() {
 
     Object.assign(Component.prototype, ReactComponent.prototype, {
 
+        constructor: ReactComponent,
+
         internalConstructor(props, context) {
 
             this::ReactComponent(props, context);
@@ -21,10 +23,8 @@ export function initialize() {
         },
 
         setState(newState, cb) {
-            //this.$ = {};
-            ReactComponent.prototype.setState.call(this, newState);
 
-            cb && cb();
+            ReactComponent.prototype.setState.call(this, newState, cb);
         },
 
         componentDidMount() {
