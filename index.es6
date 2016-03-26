@@ -1,5 +1,5 @@
 import {Component} from 'reangulact';
-import {Component as ReactComponent} from 'react';
+//import {Component as ReactComponent} from 'react';
 import Ext from './ReactComponentExtension.es6';
 
 /**
@@ -7,5 +7,5 @@ import Ext from './ReactComponentExtension.es6';
  */
 export function initialize() {
 
-    Object.assign(Component.prototype, ReactComponent.prototype, Ext);
+    Object.assign(Component.prototype, React.Component.prototype, Ext);
 }

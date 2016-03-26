@@ -1,4 +1,4 @@
-import React from 'react';
+//import React from 'react';
 import {capitalize,properify, EMPTY_STR} from 'reangulact/utils.es6';
 
 const OPS= {
@@ -9,6 +9,10 @@ const OPS= {
 const ADAPTERS = {
 
     style(v, k, r){
+
+        v = this::resolveProp(v);
+
+        if (v === undefined ) return;
 
         if (typeof v ==='string'){
 
@@ -22,6 +26,9 @@ const ADAPTERS = {
     }
     ,
     ['class'](v, k, r,  isComponent){
+        v = this::resolveProp(v);
+
+        if (v === undefined ) return;
 
         if (typeof v ==='object'){
             v = Object.keys(v).filter((key)=>(v[key] && !(v[key] in EMPTY_STR))).join(' ');
@@ -30,9 +37,31 @@ const ADAPTERS = {
         r['className'] = v;
     }
     ,
-    click(v, k, r, isComponent){ r[isComponent ? k :'onClick']= v;},
-    change(v, k, r, isComponent){ r[isComponent ? k :'onChange']= v;},
-    scroll(v, k, r, isComponent){ r[isComponent ? k :'onScroll']= v;}
+    click(v, k, r, isComponent){
+        r[isComponent ? k :'onClick']= this.getClicker(v.slice(1));
+    },
+    change(v, k, r, isComponent){
+        v = this::resolveProp(v);
+
+        if (v === undefined ) return;
+
+        r[isComponent ? k :'onChange']= v;
+    },
+    scroll(v, k, r, isComponent){
+        v = this::resolveProp(v);
+
+        if (v === undefined ) return;
+
+        r[isComponent ? k :'onScroll']= v;
+    }
+    ,
+    ["*"](v, k, r, isComponent){
+        v = this::resolveProp(v);
+
+        if (v === undefined ) return;
+
+        r[k] = v;
+    }
 };
 
 let COUNTER = 0;
@@ -105,24 +134,13 @@ export function createElement(type, props, ...children) {
 
             if (k==='if' || k==='each') return r;
 
-            let value = props[k];
+            const value = props[k];
 
             if (value === undefined ) return r;
 
-            value = this::resolveProp(value);
+            const adapter = ADAPTERS[k] || ADAPTERS['*'];
 
-            if (value === undefined ) return r;
-
-            let adapter = ADAPTERS[k];
-
-            if (adapter) {
-
-                adapter.call(this, value, k, r, isComponent);
-
-            } else {
-
-                r[k] = value;
-            }
+            adapter.call(this, value, k, r, isComponent);
 
             return r;
 

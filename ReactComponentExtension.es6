@@ -1,13 +1,13 @@
-import {Component as ReactComponent} from 'react';
+//import {Component as ReactComponent} from 'react';
 import {createElement} from './ReactUtils.es6';
 
 export default {
 
-    constructor: ReactComponent,
+    constructor: React.Component,
 
     internalConstructor(props, context) {
 
-        this::ReactComponent(props, context);
+        this::React.Component(props, context);
 
         this.state = this.getDefaults(props);
 
@@ -18,7 +18,7 @@ export default {
 
     setState(newState, cb) {
 
-        ReactComponent.prototype.setState.call(this, newState, cb);
+        React.Component.prototype.setState.call(this, newState, cb);
     },
 
     componentWillReceiveProps(newProps) {
