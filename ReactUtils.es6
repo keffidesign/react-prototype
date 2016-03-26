@@ -22,9 +22,11 @@ const ADAPTERS = {
     }
     ,
     ['class'](v, k, r,  isComponent){
-        if (typeof v !=='string'){
+
+        if (typeof v ==='object'){
             v = Object.keys(v).filter((key)=>(v[key] && !(v[key] in EMPTY_STR))).join(' ');
         }
+
         r['className'] = v;
     }
     ,
@@ -103,13 +105,20 @@ export function createElement(type, props, ...children) {
 
             if (k==='if' || k==='each') return r;
 
-            let value = this::resolveProp(props[k]);
+            let value = props[k];
+
+            if (value === undefined ) return r;
+
+            value = this::resolveProp(value);
+
+            if (value === undefined ) return r;
 
             let adapter = ADAPTERS[k];
 
             if (adapter) {
 
                 adapter.call(this, value, k, r, isComponent);
+
             } else {
 
                 r[k] = value;
