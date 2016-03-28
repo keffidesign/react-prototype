@@ -1,9 +1,9 @@
 //import React from 'react';
 import {capitalize,properify, EMPTY_STR} from 'reangulact/utils.es6';
 
-const OPS= {
-    'is': (a,b)=> (a===b),
-    'isnt': (a,b)=> (a!==b)
+const OPS = {
+    'is': (a, b)=> (a === b),
+    'isnt': (a, b)=> (a !== b)
 }
 
 const ADAPTERS = {
@@ -12,9 +12,9 @@ const ADAPTERS = {
 
         v = this::resolveProp(v);
 
-        if (v === undefined ) return;
+        if (v === undefined) return;
 
-        if (typeof v ==='string'){
+        if (typeof v === 'string') {
 
             v = v.split(';').reduce((p, q, i, arr, kv = q.split(':'))=>(p[(kv[0])] = kv[1], p), {})
         }
@@ -25,12 +25,12 @@ const ADAPTERS = {
         }, {});
     }
     ,
-    ['class'](v, k, r,  isComponent){
+    ['class'](v, k, r, isComponent){
         v = this::resolveProp(v);
 
-        if (v === undefined ) return;
+        if (v === undefined) return;
 
-        if (typeof v ==='object'){
+        if (typeof v === 'object') {
             v = Object.keys(v).filter((key)=>(v[key] && !(v[key] in EMPTY_STR))).join(' ');
         }
 
@@ -38,27 +38,27 @@ const ADAPTERS = {
     }
     ,
     click(v, k, r, isComponent){
-        r[isComponent ? k :'onClick']= this.getClicker(v.slice(1));
+        r[isComponent ? k : 'onClick'] = this.getClicker(v.slice(1));
     },
     change(v, k, r, isComponent){
         v = this::resolveProp(v);
 
-        if (v === undefined ) return;
+        if (v === undefined) return;
 
-        r[isComponent ? k :'onChange']= v;
+        r[isComponent ? k : 'onChange'] = v;
     },
     scroll(v, k, r, isComponent){
         v = this::resolveProp(v);
 
-        if (v === undefined ) return;
+        if (v === undefined) return;
 
-        r[isComponent ? k :'onScroll']= v;
+        r[isComponent ? k : 'onScroll'] = v;
     }
     ,
     ["*"](v, k, r, isComponent){
         v = this::resolveProp(v);
 
-        if (v === undefined ) return;
+        if (v === undefined) return;
 
         r[k] = v;
     }
@@ -68,7 +68,7 @@ let COUNTER = 0;
 
 export function createElement(type, props, ...children) {
 
-    if (type === 'children'){
+    if (type === 'children') {
 
         return this.props.children;
     }
@@ -102,7 +102,7 @@ export function createElement(type, props, ...children) {
 
             let val = this::resolveProp(ifExpr);
 
-            if (ifMatch!==undefined) {
+            if (ifMatch !== undefined) {
                 val = OPS[ifOp](val, this::resolveProp(ifMatch))
             }
 
@@ -110,33 +110,33 @@ export function createElement(type, props, ...children) {
 
                 const elze = children.find(([type]) => type === 'else');
 
-                if (!elze || elze.length<3) return null;
+                if (!elze || elze.length < 3) return null;
 
-                const map = elze.slice(2).reduce((r,d) => {
+                const map = elze.slice(2).reduce((r, d) => {
                     const el = createElement.apply(this, d);
-                    if (el){
+                    if (el) {
                         r.push(el)
                     }
                     return r;
                 }, []);
 
-                console.log('else',elze, map);
+                console.log('else', elze, map);
 
-                return map.length===1 ? map[0] : map;
+                return map.length === 1 ? map[0] : map;
             }
 
             children = children.filter(([type]) => type !== 'else');
         }
 
-        const isComponent  = (typeof type !== 'string');
+        const isComponent = (typeof type !== 'string');
 
         props = Object.keys(props).reduce((r, k) => {
 
-            if (k==='if' || k==='each') return r;
+            if (k === 'if' || k === 'each') return r;
 
             const value = props[k];
 
-            if (value === undefined ) return r;
+            if (value === undefined) return r;
 
             const adapter = ADAPTERS[k] || ADAPTERS['*'];
 
@@ -149,11 +149,11 @@ export function createElement(type, props, ...children) {
 
     children = children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : createElement.apply(this, c));
 
-    console.log('createElement',type, props, children);
+    // console.log('createElement',type, props, children);
 
     return type === 'for' || type === 'else' || type === 'block'
         ?
-        (children.length===1?children[0]:children)
+        (children.length === 1 ? children[0] : children)
         :
         React.createElement(type, props, ...children);
 }
@@ -179,12 +179,12 @@ function parseBindingExpression(p) {
 
     if (p[0] === '{' && p.endsWith('}')) {
 
-        return Function('return '+p.replace(/\(:(\w+(\.\w+)*)\)/g,(s,s1)=>`this.get("${s1}")`)).call(this);
+        return Function('return ' + p.replace(/\(:(\w+(\.\w+)*)\)/g, (s, s1)=>`this.get("${s1}")`)).call(this);
     }
 
     if (p[0] === '(' && p.endsWith(')')) {
 
-        return p.slice(1, p.length-1).replace(/\(:(\w+(\.\w+)*)\)/g,(s,s1)=>this.get(s1));
+        return p.slice(1, p.length - 1).replace(/\(:(\w+(\.\w+)*)\)/g, (s, s1)=>this.get(s1));
     }
 
     return p;
