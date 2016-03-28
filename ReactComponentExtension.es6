@@ -23,7 +23,10 @@ export default {
 
     componentWillReceiveProps(newProps) {
 
-        this.update(newProps);
+        if (!newProps.children){
+            this.update(newProps);
+        }
+
     },
 
     componentDidMount() {
