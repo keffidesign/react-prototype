@@ -179,7 +179,15 @@ function parseBindingExpression(p) {
 
     if (p[0] === '{' && p.endsWith('}')) {
 
-        return Function('return ' + p.replace(/\(:(\w+(\.\w+)*)\)/g, (s, s1)=>`this.get("${s1}")`)).call(this);
+        try {
+
+            const fn = this.$[`_expr_${p}`] || (this.$[`_parse${p}`] = Function('return ' + p.replace(/\(:(\w+(\.\w+)*)\)/g, (s, s1)=>`this.get("${s1}")`)))
+            return fn.call(this);
+
+        } catch (ex){
+
+            return ex.message
+        }
     }
 
     if (p[0] === '(' && p.endsWith(')')) {
