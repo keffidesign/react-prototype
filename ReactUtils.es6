@@ -68,7 +68,7 @@ let COUNTER = 0;
 
 export function createElement(type, props, ...children) {
 
-    if (type === 'children') {
+    if (type === 'children' || type==='routing') {
 
         return this.props.children;
     }
