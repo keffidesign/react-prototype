@@ -147,15 +147,27 @@ export function createElement(type, props, ...children) {
         }, {});
     }
 
-    children = children.map(c => (typeof c === 'string') ? this::resolveProp(c.trim()) : createElement.apply(this, c));
-
-    // console.log('createElement',type, props, children);
+    children = this::resolveChildren(children);
 
     return type === 'for' || type === 'else' || type === 'block'
         ?
         (children.length === 1 ? children[0] : children)
         :
         React.createElement(type, props, ...children);
+}
+
+function resolveChildren(children) {
+
+    return children.map(c => {
+
+        if (typeof c !== 'string') return createElement.apply(this, c);
+
+        const result = this::resolveProp(c.trim());
+
+        return Array.isArray(result) ? createElement.apply(this, result) : result;
+
+    });
+
 }
 
 function resolveProp(_p) {
