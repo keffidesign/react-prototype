@@ -68,9 +68,15 @@ let COUNTER = 0;
 
 export function createElement(type, props, ...children) {
 
-    if (type === 'children' || type==='routing') {
+    if (type === 'children' || type === 'routing') {
 
         return this.props.children;
+    }
+
+    if (type === 'component') {
+
+        type = this::resolveProp(props.type);
+
     }
 
     if (props) {
